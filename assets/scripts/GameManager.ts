@@ -4,6 +4,7 @@ const { ccclass, property } = _decorator;
 import { Timer } from './Timer';
 import { Score } from './Score';
 import {FruitManager} from './FruitManager';
+import {Player} from './Player';
 
 enum CursorTypes {
     default = 'default',
@@ -21,14 +22,19 @@ export class GameManager extends Component {
 
     @property({ type: [Prefab] })
     fruitPrefabs: Prefab[];
+    @property(Prefab)
+    heartPrefab: Prefab;
 
     @property(Label)
     timerLabel: Label;
     @property(Label)
     scoreLabel: Label;
+    @property(Label)
+    playerLifeLabel: Label;
 
     private timer: Timer;
     private score: Score;
+    private player: Player;
     private canvas: Node;
     private fruitManager: FruitManager;
     private canvasSize: UITransform['contentSize'];
@@ -46,7 +52,7 @@ export class GameManager extends Component {
 
     private setupGame() {
         this.setupHandlers();
-        this.setupTimerAndScore();
+        this.setupTimerScorePlayer();
         this.setupFruitManager();
     }
 
@@ -58,9 +64,10 @@ export class GameManager extends Component {
             .on(Contact2DType.BEGIN_CONTACT, this.contactHandler, this);
     }
 
-    private setupTimerAndScore() {
+    private setupTimerScorePlayer() {
         this.timer = new Timer(this.timerLabel);
         this.score = new Score(this.scoreLabel);
+        this.player = new Player(this.playerLifeLabel, this.heartPrefab);
     }
 
     private setupFruitManager() {
@@ -69,6 +76,7 @@ export class GameManager extends Component {
 
     private startGame() {
         this.timer.startTimer();
+        this.player.resetLife();
         this.fruitManager.startFruitsFalling();
     }
 
@@ -78,6 +86,7 @@ export class GameManager extends Component {
 
         this.finishModal.active = true;
         this.fruitManager.stopFruitsFalling();
+        this.timer.stopTimer();
     }
 
     restartGame() {
@@ -103,7 +112,12 @@ export class GameManager extends Component {
             const contactedNodeUUID = contactedNode.uuid;
 
             if (contactedNodeUUID !== this.lastContactedFruitUUID) {
-                this.score.increaseScore(caughtFruit.score);
+                if (caughtFruit.isNegative) {
+                    this.player.decreaseLife();
+                } else {
+                    this.score.increaseScore(caughtFruit.score);
+                }
+
                 this.lastContactedFruitUUID = contactedNode.uuid
 
                 const tween = new Tween(contactedNode);

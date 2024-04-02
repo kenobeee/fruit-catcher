@@ -46,7 +46,6 @@ export class Timer {
                     .getComponent(GameManager);
 
                 gameManager.stopGame();
-                this.stopTimer();
             }
         }
     }
