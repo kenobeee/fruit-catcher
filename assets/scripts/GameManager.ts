@@ -3,8 +3,8 @@ const { ccclass, property } = _decorator;
 
 import { Timer } from './Timer';
 import { Score } from './Score';
-import {FruitManager} from './FruitManager';
-import {Player} from './Player';
+import { FruitManager } from './FruitManager';
+import { Player } from './Player';
 
 enum CursorTypes {
     default = 'default',
@@ -81,17 +81,17 @@ export class GameManager extends Component {
     }
 
     stopGame() {
-        game.canvas.style.cursor = CursorTypes.default;
+        game.canvas.style.cursor = CursorTypes.default; // set the cursor back default view
         input.off(Input.EventType.MOUSE_MOVE, this.onMouseMove, this);
-
-        this.finishModal.active = true;
+        this.finishModal.active = true; // show the finish modal
         this.fruitManager.stopFruitsFalling();
         this.timer.stopTimer();
     }
 
+
     restartGame() {
-        this.finishModal.active = false;
-        this.bucket.setPosition(0, -280);
+        this.finishModal.active = false; // hide the finish modal
+        this.bucket.setPosition(0, -280); // reset the position of the bucket
         this.score.resetScore();
         this.timer.resetTimer();
 
@@ -105,6 +105,11 @@ export class GameManager extends Component {
         );
     }
 
+    /**
+     * handle collisions between objects
+     * @param _ - current node (not need)
+     * @param contactedNode - the node that was contacted
+     */
     private contactHandler(_, { node: contactedNode }: Collider2D) {
         const caughtFruit = this.fruitManager.findFruitByNodeName(contactedNode.name);
 
