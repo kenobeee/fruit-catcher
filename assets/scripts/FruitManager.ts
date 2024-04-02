@@ -10,20 +10,22 @@ export class FruitManager {
     patterns: Fruit[];
     private fruitIntervalId: number | null;
     private readonly parentCanvas: Node;
-    private canvasSize: UITransform['contentSize'];
+    private readonly canvasWidth: UITransform['contentSize']['width'];
+    private readonly canvasHeight: UITransform['contentSize']['height'];
 
     constructor(prefabs: Prefab[], canvas: Node, canvasSize: UITransform['contentSize']) {
         this.patterns = prefabs.map(prefab => new Fruit(prefab));
         this.parentCanvas = canvas;
-        this.canvasSize = canvasSize;
+        this.canvasWidth = canvasSize.width;
+        this.canvasHeight = canvasSize.height;
     }
 
     generateRandomFruitOnTheCanvas() {
         const randomFruit = this.patterns[getRandomInt(0, this.patterns.length - 1)];
         const instantiatedFruit = instantiate(randomFruit.prefab);
 
-        const xSpawn = getRandomInt(-(this.canvasSize.width / 2), this.canvasSize.width / 2);
-        const ySpawn = this.canvasSize.height / 2 + instantiatedFruit.getComponent(UITransform).contentSize.height;
+        const xSpawn = getRandomInt(-(this.canvasWidth / 2), this.canvasWidth / 2);
+        const ySpawn = this.canvasHeight / 2 + instantiatedFruit.getComponent(UITransform).contentSize.height;
 
         instantiatedFruit.setParent(this.parentCanvas);
         instantiatedFruit.setPosition(xSpawn, ySpawn);
