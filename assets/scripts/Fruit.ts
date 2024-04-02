@@ -8,9 +8,9 @@ export class Fruit {
     fallSpeed: number = 0;
     name:string;
 
-    private maxFallingSpeed:number = 30;
-    private minFallingSpeed:number = 10;
-    private scoreSpeedRatio:number = 20;
+    private maxFallingSpeed:number = 10;
+    private minFallingSpeed:number = 1;
+    private scoreSpeedRatio:number = 100;
 
     constructor(prefab:Prefab) {
         const randomSpeed = getRandomInt(this.minFallingSpeed, this.maxFallingSpeed);

@@ -63,7 +63,7 @@ export class GameManager extends Component {
         instantiatedFruit.setParent(this.canvas);
         instantiatedFruit.setPosition(xSpawn, ySpawn);
         instantiatedFruit.setSiblingIndex(3);
-        instantiatedFruit.getComponent(RigidBody2D).linearVelocity = new Vec2(0, -randomFruit.fallSpeed);
+        instantiatedFruit.getComponent(RigidBody2D).gravityScale = randomFruit.fallSpeed;
 
         this.scheduleOnce(() => {
             instantiatedFruit.destroy();
