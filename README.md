@@ -1,5 +1,5 @@
 # Fruit Catcher Game
-
+[Preview there](https://itmuch.ru)
 ## Description
 Fruit Catcher Game is a simple 2D game developed using Cocos Creator. The player controls a bucket to catch falling fruits within a limited time. The game features a score system and player lives. The goal is to achieve the highest score possible before running out of lives or time.
 
