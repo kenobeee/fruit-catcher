@@ -1,9 +1,9 @@
-import { _decorator, Component, Node, Label, Collider2D, Contact2DType, Vec2, Vec3, Prefab, Tween, RigidBody2D, instantiate, director, screen, input, Input, EventMouse, UITransform, game } from 'cc';
+import { _decorator, Component, Node, Label, Collider2D, Contact2DType, Vec3, Prefab, Tween, RigidBody2D, instantiate, director, input, Input, EventMouse, UITransform, game } from 'cc';
 const { ccclass, property } = _decorator;
 
-import {Fruit} from './Fruit';
-import {Timer} from './Timer';
-import {Score} from './Score';
+import { Fruit } from './Fruit';
+import { Timer } from './Timer';
+import { Score } from './Score';
 import { getRandomInt } from './utils';
 
 @ccclass('GameManager')
@@ -26,7 +26,7 @@ export class GameManager extends Component {
     private fruitsList: Fruit[] = [];
     private fruitsMakingInterval: number = 1;
     private fruitsRemovingInterval: number = 4;
-    private lastContactedFruitUUID:string | null;
+    private lastContactedFruitUUID: string | null = null;
 
     onLoad() {
         game.canvas.style.cursor = 'none';
@@ -38,7 +38,7 @@ export class GameManager extends Component {
         this.canvas = director.getScene().getChildByName('Canvas');
         this.canvasSize = this.canvas.getComponent(UITransform).contentSize;
 
-        this.fruitsList = this.fruitPrefabs.map((prefab) => new Fruit(prefab));
+        this.fruitsList = this.fruitPrefabs.map(prefab => new Fruit(prefab));
     }
 
     start() {
@@ -48,10 +48,10 @@ export class GameManager extends Component {
     }
 
     onMouseMove(event: EventMouse) {
-        const newBucketXPosition = event.getLocation().x - screen.windowSize.width / 2;
-        const newBucketYPosition = this.bucket.getPosition().y;
-
-        this.bucket.setPosition(newBucketXPosition, newBucketYPosition);
+        this.bucket.setPosition(
+            event.getLocation().x - this.canvasSize.width / 2,
+            this.bucket.position.y
+        );
     }
 
     private generateRandomFruit() {
@@ -70,15 +70,13 @@ export class GameManager extends Component {
         }, this.fruitsRemovingInterval);
     }
 
-    private contactHandler(_, {node: contactedNode}: Collider2D) {
-        const caughtFruit = this.fruitsList.find((fruit) =>
-            fruit.name === contactedNode.name);
+    private contactHandler(_, { node: contactedNode }: Collider2D) {
+        const caughtFruit = this.fruitsList.find(fruit => fruit.name === contactedNode.name);
 
-        // caught
         if (caughtFruit) {
             const contactedNodeUUID = contactedNode.uuid;
 
-            if (!(contactedNodeUUID === this.lastContactedFruitUUID)) {
+            if (contactedNodeUUID !== this.lastContactedFruitUUID) {
                 this.score.increaseScore(caughtFruit.score);
                 this.lastContactedFruitUUID = contactedNode.uuid
 
