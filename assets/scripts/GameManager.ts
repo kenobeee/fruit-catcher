@@ -38,18 +38,40 @@ export class GameManager extends Component {
         this.canvas = director.getScene().getChildByName('Canvas');
         this.canvasSize = this.canvas.getComponent(UITransform).contentSize;
     }
+
     start() {
+        this.setupGame();
+        this.startGame();
+    }
+
+    private setupGame() {
+        this.setupHandlers();
+        this.setupTimerAndScore();
+        this.setupFruitManager();
+    }
+
+    private setupHandlers() {
         game.canvas.style.cursor = CursorTypes.none;
         input.on(Input.EventType.MOUSE_MOVE, this.onMouseMove, this);
-        this.bucketSensor.getComponent(Collider2D).on(Contact2DType.BEGIN_CONTACT, this.contactHandler, this);
+        this.bucketSensor
+            .getComponent(Collider2D)
+            .on(Contact2DType.BEGIN_CONTACT, this.contactHandler, this);
+    }
 
+    private setupTimerAndScore() {
         this.timer = new Timer(this.timerLabel);
         this.score = new Score(this.scoreLabel);
-        this.fruitManager = new FruitManager(this.fruitPrefabs, this.canvas, this.canvasSize);
+    }
 
+    private setupFruitManager() {
+        this.fruitManager = new FruitManager(this.fruitPrefabs, this.canvas, this.canvasSize);
+    }
+
+    private startGame() {
         this.timer.startTimer();
         this.fruitManager.startFruitsFalling();
     }
+
     stopGame() {
         game.canvas.style.cursor = CursorTypes.default;
         input.off(Input.EventType.MOUSE_MOVE, this.onMouseMove, this);
@@ -57,6 +79,7 @@ export class GameManager extends Component {
         this.finishModal.active = true;
         this.fruitManager.stopFruitsFalling();
     }
+
     restartGame() {
         this.finishModal.active = false;
         this.bucket.setPosition(0, -280);
