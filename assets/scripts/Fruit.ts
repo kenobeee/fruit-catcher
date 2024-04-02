@@ -8,7 +8,7 @@ export class Fruit {
     fallSpeed: number = 0;
     name:string;
 
-    private maxFallingSpeed:number = 10;
+    private maxFallingSpeed:number = 5;
     private minFallingSpeed:number = 1;
     private scoreSpeedRatio:number = 100;
 

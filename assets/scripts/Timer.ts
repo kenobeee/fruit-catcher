@@ -1,8 +1,9 @@
-import { Label } from 'cc';
+import { Label, director } from 'cc';
+import {GameManager} from './GameManager';
 
 export class Timer {
     private readonly timerLabel: Label | null;
-    private timer: number = 19;
+    private timer: number = 29;
     private intervalId: number | null;
 
     constructor(timerLabel: Label) {
@@ -31,13 +32,14 @@ export class Timer {
             this.timerLabel.string = `${this.timer}`;
 
             if (this.timer <= 0) {
-                this.endGame();
+                const gameManager = director
+                    .getScene()
+                    .getChildByName('GameManager')
+                    .getComponent(GameManager);
+
+                gameManager.stopGame();
+                this.stopTimer();
             }
         }
-    }
-
-    private endGame() {
-        this.stopTimer();
-        console.log('end');
     }
 }

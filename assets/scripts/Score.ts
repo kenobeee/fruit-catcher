@@ -12,14 +12,14 @@ export class Score {
     increaseScore(points: number) {
         this.score += points;
         if (this.scoreLabel) {
-            this.scoreLabel.string = `Score: ${this.score}`;
+            this.scoreLabel.string = `${this.score}`;
         }
     }
 
     resetScore() {
         this.score = 0;
         if (this.scoreLabel) {
-            this.scoreLabel.string = `Score: ${this.score}`;
+            this.scoreLabel.string = `${this.score}`;
         }
     }
 }

@@ -12,8 +12,12 @@ export class GameManager extends Component {
     bucket: Node | null = null;
     @property(Node)
     bucketSensor: Node | null = null;
+    @property(Node)
+    finishModal: Node | null = null;
+
     @property({ type: [Prefab] })
     fruitPrefabs: Prefab[] = [];
+
     @property(Label)
     timerLabel: Label | null = null;
     @property(Label)
@@ -43,7 +47,7 @@ export class GameManager extends Component {
 
     start() {
         this.timer.startTimer();
-        this.schedule(this.generateRandomFruit.bind(this), this.fruitsMakingInterval);
+        this.schedule(this.generateRandomFruit, this.fruitsMakingInterval);
         this.bucketSensor.getComponent(Collider2D).on(Contact2DType.BEGIN_CONTACT, this.contactHandler, this);
     }
 
@@ -65,9 +69,7 @@ export class GameManager extends Component {
         instantiatedFruit.setSiblingIndex(3);
         instantiatedFruit.getComponent(RigidBody2D).gravityScale = randomFruit.fallSpeed;
 
-        this.scheduleOnce(() => {
-            instantiatedFruit.destroy();
-        }, this.fruitsRemovingInterval);
+        this.scheduleOnce(() => instantiatedFruit.destroy(), this.fruitsRemovingInterval);
     }
 
     private contactHandler(_, { node: contactedNode }: Collider2D) {
@@ -85,5 +87,19 @@ export class GameManager extends Component {
                 tween.start();
             }
         }
+    }
+
+    stopGame() {
+        this.finishModal.active = true;
+        this.unschedule(this.generateRandomFruit);
+        input.off(Input.EventType.MOUSE_MOVE, this.onMouseMove, this);
+    }
+
+    restartGame() {
+        this.finishModal.active = false;
+        this.bucket.setPosition(0, -280);
+
+        this.onLoad();
+        this.start();
     }
 }
