@@ -2,6 +2,7 @@ import { _decorator, Component, Node, Label, Collider2D, Contact2DType, Prefab, 
 const { ccclass, property } = _decorator;
 
 import { Fruit } from './Fruit';
+import {Timer} from './Timer';
 import { getRandomInt } from './utils';
 
 @ccclass('GameManager')
@@ -15,7 +16,7 @@ export class GameManager extends Component {
     @property(Label)
     scoreLabel: Label | null = null;
 
-    timer: number = 19;
+    private timer: Timer | null;
     score: number = 0;
     fruitsRemovingInterval: number = 5;
     fruitsMakingInterval: number = 3;
@@ -23,7 +24,9 @@ export class GameManager extends Component {
 
     start() {
         input.on(Input.EventType.MOUSE_MOVE, this.onMouseMove, this);
-        this.schedule(this.updateTimer, 1);
+
+        this.timer = new Timer(this.timerLabel);
+        this.timer.startTimer();
 
         this.fruitsList = this.fruitPrefabs.map((prefab) => new Fruit(prefab));
 
@@ -69,29 +72,9 @@ export class GameManager extends Component {
 
         if (caughtFruit) {
             this.score += caughtFruit.score;
-            if (this.scoreLabel) {
-                this.scoreLabel.string = `Score: ${this.score}`;
-            }
+            this.scoreLabel.string = `Score: ${this.score}`;
 
-            if (other.node) {
-                Fruit.removeFruit(other.node);
-            }
+            Fruit.removeFruit(other.node);
         }
-    }
-
-    updateTimer() {
-        if (this.timerLabel) {
-            this.timer -= 1;
-            this.timerLabel.string = `${this.timer}`;
-
-            if (this.timer <= 0) {
-                this.endGame();
-            }
-        }
-    }
-
-    endGame() {
-        this.unschedule(this.updateTimer);
-        console.log('end');
     }
 }
