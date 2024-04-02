@@ -22,61 +22,55 @@ export class GameManager extends Component {
     private fruitsList: Fruit[] = [];
     private fruitsMakingInterval: number = 3;
     private fruitsRemovingInterval: number = 5;
+    private screenSize: { width: number, height: number };
+    private canvas;
 
     start() {
         input.on(Input.EventType.MOUSE_MOVE, this.onMouseMove, this);
 
         this.timer = new Timer(this.timerLabel);
         this.score = new Score(this.scoreLabel);
-
         this.timer.startTimer();
-
+        this.screenSize = screen.windowSize;
+        this.canvas = director.getScene().getChildByName('Canvas');
         this.fruitsList = this.fruitPrefabs.map((prefab) => new Fruit(prefab));
 
-        if (this.bucket) {
-            const collider = this.bucket.getComponent(Collider2D);
-            if (collider) {
-                collider.on(Contact2DType.BEGIN_CONTACT, this.catchingFruits, this);
-            }
-        }
-
-        this.schedule(this.fallFruits.bind(this), this.fruitsMakingInterval);
+        const collider = this.bucket.getComponent(Collider2D);
+        collider.on(Contact2DType.BEGIN_CONTACT, this.contactHandler, this);
+        this.schedule(() =>
+            this.fallFruits(),
+            this.fruitsMakingInterval
+        );
     }
 
     onMouseMove(event: EventMouse) {
-        const mousePositionX = event.getLocation().x;
-        const canvasWidth = screen.windowSize.width;
+        const newBucketXPosition = event.getLocation().x - this.screenSize.width / 2;
+        const newBucketYPosition = this.bucket.getPosition().y;
 
-        if (this.bucket) {
-            this.bucket.setPosition(mousePositionX - canvasWidth / 2, this.bucket.getPosition().y);
-        }
+        this.bucket.setPosition(newBucketXPosition, newBucketYPosition);
     }
 
     private fallFruits() {
-        const { width: canvasWidth, height: canvasHeight } = screen.windowSize;
+        const fruit = instantiate(this.fruitsList[getRandomInt(0, this.fruitsList.length - 1)].prefab);
 
-        const canvas = director.getScene().getChildByName('Canvas');
-        const randomIndex = Math.floor(Math.random() * this.fruitsList.length);
-        const fruit = instantiate(this.fruitsList[randomIndex].prefab);
+        const xSpawn = getRandomInt(-(this.screenSize.width / 2), this.screenSize.width / 2);
+        const ySpawn = this.screenSize.height / 2;
 
-        const horizontalSpawn = getRandomInt(-(canvasWidth / 2), canvasWidth / 2);
-        const verticalSpawn = canvasHeight / 2;
-
-        fruit.setParent(canvas);
-        fruit.setPosition(horizontalSpawn, verticalSpawn);
+        fruit.setParent(this.canvas);
+        fruit.setPosition(xSpawn, ySpawn);
 
         this.scheduleOnce(() => {
             Fruit.removeFruit(fruit);
         }, this.fruitsRemovingInterval);
     }
 
-    private catchingFruits(self: Collider2D, other: Collider2D) {
-        const caughtFruit = this.fruitsList.find((fruit) => fruit.name === other.node?.name);
+    private contactHandler(_, {node: contactedNode}: Collider2D) {
+        const caughtFruit = this.fruitsList.find((fruit) =>
+            fruit.name === contactedNode.name);
 
         if (caughtFruit) {
             this.score.increaseScore(caughtFruit.score);
-
-            Fruit.removeFruit(other.node);
+            Fruit.removeFruit(contactedNode);
         }
     }
 }
