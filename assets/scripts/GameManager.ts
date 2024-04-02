@@ -3,6 +3,7 @@ const { ccclass, property } = _decorator;
 
 import { Fruit } from './Fruit';
 import {Timer} from './Timer';
+import {Score} from './Score';
 import { getRandomInt } from './utils';
 
 @ccclass('GameManager')
@@ -17,15 +18,17 @@ export class GameManager extends Component {
     scoreLabel: Label | null = null;
 
     private timer: Timer | null;
-    score: number = 0;
-    fruitsRemovingInterval: number = 5;
-    fruitsMakingInterval: number = 3;
-    fruitsList: Fruit[] = [];
+    private score: Score | null;
+    private fruitsList: Fruit[] = [];
+    private fruitsMakingInterval: number = 3;
+    private fruitsRemovingInterval: number = 5;
 
     start() {
         input.on(Input.EventType.MOUSE_MOVE, this.onMouseMove, this);
 
         this.timer = new Timer(this.timerLabel);
+        this.score = new Score(this.scoreLabel);
+
         this.timer.startTimer();
 
         this.fruitsList = this.fruitPrefabs.map((prefab) => new Fruit(prefab));
@@ -71,8 +74,7 @@ export class GameManager extends Component {
         const caughtFruit = this.fruitsList.find((fruit) => fruit.name === other.node?.name);
 
         if (caughtFruit) {
-            this.score += caughtFruit.score;
-            this.scoreLabel.string = `Score: ${this.score}`;
+            this.score.increaseScore(caughtFruit.score);
 
             Fruit.removeFruit(other.node);
         }
