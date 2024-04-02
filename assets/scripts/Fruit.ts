@@ -1,4 +1,4 @@
-import { Prefab, Node } from 'cc';
+import { Prefab } from 'cc';
 
 import {getRandomInt} from './utils';
 
@@ -6,21 +6,18 @@ export class Fruit {
     prefab: Prefab;
     score: number = 0;
     fallSpeed: number = 0;
-    name:string ;
+    name:string;
 
-    maxFruitScore:number = 500;
-    minFruitScore:number = 100;
-    maxFruitSpeed:number = 50;
-    minFruitSpeed:number = 0;
+    private maxFallingSpeed:number = 30;
+    private minFallingSpeed:number = 10;
+    private scoreSpeedRatio:number = 20;
 
     constructor(prefab:Prefab) {
+        const randomSpeed = getRandomInt(this.minFallingSpeed, this.maxFallingSpeed);
+
         this.prefab = prefab;
         this.name = prefab.name;
-        this.score = getRandomInt(this.minFruitScore, this.maxFruitScore);
-        this.fallSpeed = getRandomInt(this.minFruitSpeed, this.maxFruitSpeed);
-    }
-
-    static removeFruit(fruitNode: Node) {
-        if (fruitNode && fruitNode.isValid) fruitNode.destroy();
+        this.fallSpeed = randomSpeed;
+        this.score = randomSpeed * this.scoreSpeedRatio;
     }
 }
