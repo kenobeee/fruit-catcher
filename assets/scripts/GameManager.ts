@@ -6,49 +6,66 @@ import { Timer } from './Timer';
 import { Score } from './Score';
 import { getRandomInt } from './utils';
 
+const FRUITS_GENERATE_INTERVAL: number = 1;
+const FRUITS_REMOVE_INTERVAL: number = 4;
+
+enum CursorTypes {
+    default = 'default',
+    none = 'none'
+}
+
 @ccclass('GameManager')
 export class GameManager extends Component {
     @property(Node)
-    bucket: Node | null = null;
+    bucket: Node;
     @property(Node)
-    bucketSensor: Node | null = null;
+    bucketSensor: Node;
     @property(Node)
-    finishModal: Node | null = null;
+    finishModal: Node;
 
     @property({ type: [Prefab] })
-    fruitPrefabs: Prefab[] = [];
+    fruitPrefabs: Prefab[];
 
     @property(Label)
-    timerLabel: Label | null = null;
+    timerLabel: Label;
     @property(Label)
-    scoreLabel: Label | null = null;
+    scoreLabel: Label;
 
-    private timer: Timer | null = null;
-    private score: Score | null = null;
-    private canvas: Node | null = null;
-    private canvasSize: UITransform['contentSize'] | null = null;
-    private fruitsList: Fruit[] = [];
-    private fruitsMakingInterval: number = 1;
-    private fruitsRemovingInterval: number = 4;
-    private lastContactedFruitUUID: string | null = null;
+    private timer: Timer;
+    private score: Score;
+    private canvas: Node;
+    private canvasSize: UITransform['contentSize'];
+    private fruitsList: Fruit[];
+    private lastContactedFruitUUID: string;
 
-    onLoad() {
-        game.canvas.style.cursor = 'none';
+    start() {
+        game.canvas.style.cursor = CursorTypes.none;
         input.on(Input.EventType.MOUSE_MOVE, this.onMouseMove, this);
 
         this.timer = new Timer(this.timerLabel);
         this.score = new Score(this.scoreLabel);
+        this.fruitsList = this.fruitPrefabs.map(prefab => new Fruit(prefab));
 
         this.canvas = director.getScene().getChildByName('Canvas');
         this.canvasSize = this.canvas.getComponent(UITransform).contentSize;
-
-        this.fruitsList = this.fruitPrefabs.map(prefab => new Fruit(prefab));
-    }
-
-    start() {
         this.timer.startTimer();
-        this.schedule(this.generateRandomFruit, this.fruitsMakingInterval);
+        this.schedule(this.generateRandomFruit, FRUITS_GENERATE_INTERVAL);
         this.bucketSensor.getComponent(Collider2D).on(Contact2DType.BEGIN_CONTACT, this.contactHandler, this);
+    }
+    stopGame() {
+        game.canvas.style.cursor = CursorTypes.default;
+        input.off(Input.EventType.MOUSE_MOVE, this.onMouseMove, this);
+
+        this.finishModal.active = true;
+        this.unschedule(this.generateRandomFruit);
+    }
+    restartGame() {
+        this.finishModal.active = false;
+        this.bucket.setPosition(0, -280);
+        this.score.resetScore();
+        this.timer.resetTimer();
+
+        this.start();
     }
 
     onMouseMove(event: EventMouse) {
@@ -69,9 +86,8 @@ export class GameManager extends Component {
         instantiatedFruit.setSiblingIndex(3);
         instantiatedFruit.getComponent(RigidBody2D).gravityScale = randomFruit.fallSpeed;
 
-        this.scheduleOnce(() => instantiatedFruit.destroy(), this.fruitsRemovingInterval);
+        this.scheduleOnce(() => instantiatedFruit.destroy(), FRUITS_REMOVE_INTERVAL);
     }
-
     private contactHandler(_, { node: contactedNode }: Collider2D) {
         const caughtFruit = this.fruitsList.find(fruit => fruit.name === contactedNode.name);
 
@@ -83,23 +99,9 @@ export class GameManager extends Component {
                 this.lastContactedFruitUUID = contactedNode.uuid
 
                 const tween = new Tween(contactedNode);
-                tween.to(0.1, { scale: new Vec3(0, 0, 0) });
+                tween.to(0.2, { scale: new Vec3(0, 0, 0) });
                 tween.start();
             }
         }
-    }
-
-    stopGame() {
-        this.finishModal.active = true;
-        this.unschedule(this.generateRandomFruit);
-        input.off(Input.EventType.MOUSE_MOVE, this.onMouseMove, this);
-    }
-
-    restartGame() {
-        this.finishModal.active = false;
-        this.bucket.setPosition(0, -280);
-
-        this.onLoad();
-        this.start();
     }
 }
