@@ -29,11 +29,6 @@ export class Player {
     decreaseLife() {
         this.lifeCounter--;
         this.removeHeartFromLabel();
-
-        if (this.lifeCounter === 0) {
-            const gameManager = director.getScene().getChildByName('GameManager').getComponent(GameManager);
-            gameManager.stopGame();
-        }
     }
 
     /** update the player's life count and updates the UI to INSTA */
@@ -46,6 +41,11 @@ export class Player {
     private removeHeartFromLabel() {
         const lastChild = this.playerLifeLabel.node.children[this.playerLifeLabel.node.children.length - 1];
         lastChild.destroy();
+
+        if (this.lifeCounter === 0) {
+            const gameManager = director.getScene().getChildByName('GameManager').getComponent(GameManager);
+            gameManager.stopGame();
+        }
     }
 
     /** insta making hearts into the player's life label */
